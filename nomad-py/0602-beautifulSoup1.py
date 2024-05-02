@@ -44,3 +44,41 @@ print(res2.status_code)
 
 # 6.8 playwright
 ## pip install playwright beautifulsoup4
+
+# 6.9 keyword arguments.
+## argument kind.
+### positional  argument
+### keyword argument.
+## wanted.co.kr
+### mission :: 로딩, 클릭, typing, entering, wait and find. scrolling 3 times.
+
+# 6.10 interactiviti
+## get_by_placeholder
+## page.click("selector"), page.locator("selector").click();
+## fill("flutter")
+## selector.down("Enter") key event.
+## selector.down("End") key event and scroll end.
+## time.sleep
+
+# 6.11 collecting jobs. bs4.
+## bs4 ref: 6.3. easy.
+
+# 6.12 exporting to excel.
+## csv
+## excel
+## csv.writecsv
+## dictionary to values(values) dict.values()
+## dictionary to keys(title) dict.keys()
+## file = open("filename.csv", mode="w")
+## writer = csv.writer(file)
+## writer.writerow(job.values())
+## file.close()
+
+# 6.13 code challenge.
+## 일단 스킵. 주식 정보도 하기 바쁘다.
+## gist.github.com
+### Code Challenge
+#### main.py
+#### paste source
+#### Create secret gist. ( gen url )
+
