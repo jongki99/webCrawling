@@ -1,6 +1,6 @@
 *.xlsx
 
 /temp
-/stock_info
-/invest-scrapper/__pycache__
+**/stock_info
+**/__pycache__
 

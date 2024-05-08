@@ -82,9 +82,9 @@ def read_csv_file(file_path):
             
             for index, stock in enumerate(stockList):
                 stock.print()
-                stock.save_md()
+                stock.save_md2()
 
-            st.merge_txt_order_md2(stockList, 'search-20240508')
+            st.merge_txt_order_md2(stockList)
 
 
     except FileNotFoundError:
@@ -95,8 +95,21 @@ def read_csv_file(file_path):
 
 if __name__ == "__main__":
     # file_path = input("CSV 파일 경로를 입력하세요: ")
-    dd = datetime.datetime.now().strftime('%Y%m%d')
-    file_path = "./company_name_csv/s{dd}.csv"
+    nn = datetime.datetime.now()
+    nn = nn - datetime.timedelta(days=1) # 하루전.
+    dd = nn.strftime('%Y%m%d')
+    
+    current_folder_name = os.path.basename(os.getcwd())
+    print("현재 폴더명:", current_folder_name)
+
+    if current_folder_name == 'webCrawling':
+        os.chdir('invest-scrapper')
+
+    path = os.getcwd()
+
+    file_path = os.path.join(path, f"company_name_csv/s{dd}.csv")
+
+    print(file_path)
 
     read_csv_file(file_path)
 

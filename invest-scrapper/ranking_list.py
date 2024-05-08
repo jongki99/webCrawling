@@ -5,7 +5,11 @@ import code_news
 
 
 def getTypeName(type):
-    return "코스닥" if type == 1 else "코스피"
+    if type == 1:
+        return "코스닥"
+    if type == 2:
+        return "검색"
+    return "코스피"
 
 
 def getStockCode(url):
@@ -90,6 +94,10 @@ class StockInfo:
         detail = self.getDetail()
         detail.to_md_file()
 
+    def save_md2(self):
+        detail = self.getDetail()
+        detail.to_md_file2()
+
     def getDetail(self):
         detail = StockDetail(type=self.type, name=self.name, code=self.code)
         return detail
@@ -124,10 +132,10 @@ def merge_txt_order(stocks):
                 list_file.write('\n\n\n=========================n')  # 각 파일 사이에 개행 추가
 
 
-def merge_txt_order_md2(stocks, pre):
+def merge_txt_order_md2(stocks):
     dd = datetime.datetime.now().strftime('%Y%m%d')
-    file_name = f"./stock_info/{pre}/d{dd}.md"
-    source_dir = f"./stock_info/{pre}/d{dd}/"
+    file_name = f"./stock_info/s{dd}.md"
+    source_dir = f"./stock_info/s{dd}/"
 
     with open(file_name, 'w') as list_file:
         list_file.write(f"# top40 daily : {dd}\n")
@@ -189,6 +197,17 @@ class StockDetail:
     def to_md_file(self):
         dd = datetime.datetime.now().strftime('%Y%m%d')
         file_name = f"./stock_info/d{dd}/{self.code}_{self.name}_{dd}.md"
+        dir = os.path.dirname(file_name)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        
+        with open(file_name, 'w') as file:
+            file.write(str(self.md_format()))
+            self.save_chart_day_candle()
+
+    def to_md_file2(self):
+        dd = datetime.datetime.now().strftime('%Y%m%d')
+        file_name = f"./stock_info/s{dd}/{self.code}_{self.name}_{dd}.md"
         dir = os.path.dirname(file_name)
         if not os.path.exists(dir):
             os.makedirs(dir)
