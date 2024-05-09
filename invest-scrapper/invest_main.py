@@ -21,6 +21,8 @@ https://finance.naver.com/item/main.naver?code=090460 --> 주식상세.
     코스닥
         25% 이상 30번째 이상인 경우.
 """
+
+
 import ranking_list as st
 
 stocks = st.getTop40()
@@ -30,3 +32,4 @@ for index, stock in enumerate(stocks):
     stock.save_md()
 
 st.merge_txt_order_md(stocks)
+

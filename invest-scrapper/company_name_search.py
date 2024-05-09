@@ -96,7 +96,7 @@ def read_csv_file(file_path):
 if __name__ == "__main__":
     # file_path = input("CSV 파일 경로를 입력하세요: ")
     nn = datetime.datetime.now()
-    nn = nn - datetime.timedelta(days=1) # 하루전.
+    # nn = nn - datetime.timedelta(days=1) # 하루전.
     dd = nn.strftime('%Y%m%d')
     
     current_folder_name = os.path.basename(os.getcwd())
