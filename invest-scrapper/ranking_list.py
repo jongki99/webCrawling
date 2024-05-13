@@ -282,7 +282,9 @@ class StockDetail:
         else:
             self.company_price_up = ''
 
-        sel2 = soup.select('div.today p.no_exday em.no_up')[1]
+        sel2 = soup.select('div.today p.no_exday em.no_up')
+        if sel2:
+            sel2 = sel2[1]
         if sel2:
             self.company_price_up_per = sel2.select_one('span.plus').text + sel2.select_one('span.blind').text
         else:
