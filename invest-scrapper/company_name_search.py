@@ -86,6 +86,8 @@ def read_csv_file(file_path):
 
             st.merge_txt_order_md2(stockList)
 
+            st.merge_txt_order_sum(stockList, 2)
+
 
     except FileNotFoundError:
         print("파일을 찾을 수 없습니다.")

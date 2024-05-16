@@ -74,6 +74,7 @@ class StockInfo:
         self.name = name
         self.code = code
         self.url = getCodeUrl(code)
+        self.__detail = None ### TODO.
 
     def __str__(self):
         typeName = getTypeName(self.type)
@@ -99,8 +100,19 @@ class StockInfo:
         detail.to_md_file2()
 
     def getDetail(self):
-        detail = StockDetail(type=self.type, name=self.name, code=self.code)
-        return detail
+        if not( self.__detail ):
+            self.__detail = StockDetail(type=self.type, name=self.name, code=self.code)
+        return self.__detail
+    
+    def getCsvSummary(self, type=1):
+        # rainbow csv
+        detail = self.getDetail()
+        company_price = '.'.join(detail.company_price.split(','))
+        upjong_name = '.'.join(detail.upjong_name.split(','))
+        if ( type == 1 ):
+            return f"{self.name}, {self.code}, {upjong_name}, {company_price}, {detail.company_price_up_per}"
+        else:
+            return f"{self.name}, {upjong_name}, {company_price}, {detail.company_price_up_per}"
     
 def merge_txt():
     dd = datetime.datetime.now().strftime('%Y%m%d')
@@ -162,6 +174,26 @@ def merge_txt_order_md(stocks):
             with open(파일명, 'r') as 파일:
                 list_file.write(파일.read())
                 list_file.write('\n')  # 각 파일 사이에 개행 추가
+
+def merge_txt_order_sum(stocks, type=1):
+    dd = datetime.datetime.now().strftime('%Y%m%d')
+    file_name = f"./comp_sum/ss{type}_{dd}.csv"
+
+    with open(file_name, 'w') as list_file:
+        list_file.write(f", # summary daily : {dd}\n")
+
+        comp_code = ''
+        if ( type == 1 ):
+            comp_code = ', 회사코드'
+        else:
+            comp_code = ''
+        list_file.write(f"회사명{comp_code}, 업종명, 시총, 상승률, 종합평가, 이슈, 차트분석, {dd}\n")
+
+        # 디렉토리 내의 모든 파일에 대해 반복
+        for stock in stocks:
+            # 파일을 읽어와 결과 파일에 쓰기
+            list_file.write(stock.getCsvSummary(type))
+            list_file.write('\n')  # 각 파일 사이에 개행 추가
 
 
 
@@ -389,9 +421,22 @@ url : {self.url}
 
 """
 
+if __name__ == "__main__2":
+    print('split', ''.join('12,123'.split(',')))
+    print('strip', '12,123'.strip(','))
 if __name__ == "__main__":
 #    getTop40_main()
-    getDetailTest()
+#    getDetailTest()
+    current_folder_name = os.path.basename(os.getcwd())
+    print("현재 폴더명:", current_folder_name)
+
+    if current_folder_name == 'webCrawling':
+        os.chdir('invest-scrapper')
+
+    stocks = getTop40()
+
+    merge_txt_order_sum(stocks)
+
     # stocks = getTop40()
     # merge_txt_order(stocks)
 

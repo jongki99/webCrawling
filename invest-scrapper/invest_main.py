@@ -32,4 +32,5 @@ for index, stock in enumerate(stocks):
     stock.save_md()
 
 st.merge_txt_order_md(stocks)
+st.merge_txt_order_sum(stocks)
 
