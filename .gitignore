@@ -4,3 +4,8 @@
 **/stock_info
 **/__pycache__
 
+**/test_data
+
+env/
+.env
+.cache/

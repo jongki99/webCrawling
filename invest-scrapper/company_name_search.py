@@ -24,7 +24,8 @@ import csv
 import json
 import urllib.parse
 
-import ranking_list as st
+import stock_info as st
+import ranking_list as rl
 
 
 def find_company_code(json_data, company_name):
@@ -63,36 +64,36 @@ def get_invest_code(company_name):
 
 def read_csv_file(file_path):
     stockList = []
-    try:
-        with open(file_path, 'r', newline='') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                if not row:
-                    continue # 공백행 스킵.
-                elif not row[0]:
-                    continue # 첫행이 회사명.
+#    try:
+    with open(file_path, 'r', newline='') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if not row:
+                continue # 공백행 스킵.
+            elif not row[0]:
+                continue # 첫행이 회사명.
 
-                name = row[0]
-                code = get_invest_code(name)
-                if code:
-                    stock = st.StockInfo(2, name, code)
-                    stockList.append(stock)
-                    print(f"company={name} code={code}")
-        if stockList:
-            
-            for index, stock in enumerate(stockList):
-                stock.print()
-                stock.save_md2()
+            name = row[0]
+            code = get_invest_code(name)
+            if code:
+                stock = st.StockInfo(2, name, code)
+                stockList.append(stock)
+                print(f"company={name} code={code}")
+    if stockList:
+        
+        for index, stock in enumerate(stockList):
+            stock.print()
+            stock.save_md2()
 
-            st.merge_txt_order_md2(stockList)
+        rl.merge_txt_order_md2(stockList)
 
-            st.merge_txt_order_sum(stockList, 2)
+        rl.merge_txt_order_sum(stockList, 2)
 
 
-    except FileNotFoundError:
-        print("파일을 찾을 수 없습니다.")
-    except Exception as e:
-        print("오류 발생:", e)
+#    except FileNotFoundError:
+#        print("파일을 찾을 수 없습니다.")
+#    except Exception as e:
+#        print("오류 발생:", e, e)
 
 
 if __name__ == "__main__":
