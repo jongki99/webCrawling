@@ -2,6 +2,7 @@ import requests, re, datetime, time, os
 from bs4 import BeautifulSoup
 
 import code_news, stock_info as si
+from stock_info import MarketType
 
 
 def getStockCode(url):
@@ -9,13 +10,13 @@ def getStockCode(url):
     return code
 
 
-def get_stock_details(url, type):
+def get_stock_details(url, type=MarketType.KOSDAK):
 
     print("start loading...", si.getTypeName(type))
 
     stockList = []
 
-    if ( type == 1 ):
+    if ( type == MarketType.KOSDAK ):
         max_count = 30
     else:
         max_count = 10
@@ -128,6 +129,7 @@ def merge_txt_order_sum(stocks, type=1):
         os.chdir('invest-scrapper')
 
     path = os.getcwd()
+    file_name_csv = os.path.join(path, f"./comp_sum/s{type}_{dd}.csv")
     file_name = os.path.join(path, f"./comp_sum/ss{type}_{dd}.csv")
 
     with open(file_name, 'w') as list_file:
@@ -138,6 +140,39 @@ def merge_txt_order_sum(stocks, type=1):
         for stock in stocks:
             # 파일을 읽어와 결과 파일에 쓰기
             list_file.write(stock.getCsvSummary(type))
+            list_file.write('\n')
+
+    with open(file_name_csv, 'w') as list_file:
+        list_file.write(si.StockInfo.getCsvSummaryTitle(type))
+        list_file.write('\n')
+
+        # 디렉토리 내의 모든 파일에 대해 반복
+        for stock in stocks:
+            # 파일을 읽어와 결과 파일에 쓰기
+            list_file.write(stock.getSummary(type))
+            list_file.write('\n')
+
+
+def merge_txt_order_sum2(stocks, type=1):
+    dd = datetime.datetime.now().strftime('%Y%m%d')
+
+    current_folder_name = os.path.basename(os.getcwd())
+    print("현재 폴더명:", current_folder_name)
+
+    if current_folder_name == 'webCrawling':
+        os.chdir('invest-scrapper')
+
+    path = os.getcwd()
+    file_name = os.path.join(path, f"./comp_sum/sss{type}_{dd}.csv")
+
+    with open(file_name, 'w') as list_file:
+        list_file.write(si.StockInfo.getCsvSummaryTitle(type))
+        list_file.write('\n')
+
+        # 디렉토리 내의 모든 파일에 대해 반복
+        for stock in stocks:
+            # 파일을 읽어와 결과 파일에 쓰기
+            list_file.write(stock.getCsvSummary2(type))
             list_file.write('\n')
 
 

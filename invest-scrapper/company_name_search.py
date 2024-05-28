@@ -89,6 +89,9 @@ def read_csv_file(file_path):
 
         rl.merge_txt_order_sum(stockList, 2)
 
+        rl.merge_txt_order_sum2(stockList, 2)
+        # todo ai 는 일단 제외하자... 볼수가 없네. 개선도 못하고... 방법도...
+
 
 #    except FileNotFoundError:
 #        print("파일을 찾을 수 없습니다.")

@@ -5,16 +5,26 @@ from bs4 import BeautifulSoup
 import code_news
 import comp_news_keyword as kk
 
+from enum import Enum
+
+
+class MarketType(Enum):
+    KOSPI = 0,
+    KOSDAK = 1,
+    SEARCH = 99,
+
 
 def getCodeUrl(code):
     return f"https://finance.naver.com/item/main.naver?code={code}"
 
 
-def getTypeName(type):
-    if type == 1:
+def getTypeName(type=MarketType.KOSDAK):
+    if type == MarketType.KOSDAK:
         return "코스닥"
-    if type == 2:
+    if type == MarketType.SEARCH:
         return "검색"
+    if type == MarketType.KOSPI:
+        return "코스피"
     return "코스피"
 
 
@@ -161,6 +171,8 @@ class StockInfo:
         self.url = getCodeUrl(code)
         self.__detail = None ### TODO.
 
+        self.news_keys = None
+
     def __str__(self):
         typeName = getTypeName(self.type)
         return f"{typeName},name={self.name}, link={self.url}"
@@ -189,15 +201,17 @@ class StockInfo:
             self.__detail = StockDetail(type=self.type, name=self.name, code=self.code)
         return self.__detail
     
+
     def news_ai(self):
-        self.news_keys = ""
-        self.news_summary = ""
+        if ( not self.news_keys):
+            self.news_keys = ""
+            self.news_summary = ""
 
-        html_text = self.__detail.comp_issue_keys()
+            html_text = self.__detail.comp_issue_keys()
 
-        keys, summerize = kk.summarize_and_extract_keywords(html_text)
-        self.news_keys = keys
-        self.news_summary = summerize
+            keys, summerize = kk.summarize_and_extract_keywords(html_text)
+            self.news_keys = keys
+            self.news_summary = summerize
     
     def getCsvSummaryTitle(type=1):
         
@@ -208,6 +222,27 @@ class StockInfo:
         else:
             comp_code = ''
         return f"회사명{comp_code}, 업종명, 시총, 상승률, 거래대금, 종합평가, 이슈, 차트분석, {dd}\n"
+
+
+    def getSummary(self, type=1):
+        # rainbow csv
+        detail = self.getDetail()
+        # self.news_ai()
+        company_price = '.'.join(detail.company_price.split(','))
+        upjong_name = '.'.join(detail.upjong_name.split(','))
+        trade_price = detail.trade_price
+
+
+        if ( len(self.__detail.news_list) > 10 ):
+            nn = self.__detail.news_list[:10]
+        else:
+            nn = self.__detail.news_list
+        news_str = '\n      , '.join(str(news) for news in nn)
+        naver_news_str = '\n        , '.join(str(news) for news in self.__detail.news_list_naver)
+        if ( type == 1 ):
+            return f"{self.name}, {self.code}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}"
+        else:
+            return f"{self.name}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}"
 
 
     def getCsvSummary(self, type=1):
@@ -223,8 +258,8 @@ class StockInfo:
             nn = self.__detail.news_list[:10]
         else:
             nn = self.__detail.news_list
-        news_str = '\n'.join(str(news) for news in nn)
-        naver_news_str = '\n'.join(str(news) for news in self.__detail.news_list_naver)
+        news_str = '\n      , '.join(str(news) for news in nn)
+        naver_news_str = '\n        , '.join(str(news) for news in self.__detail.news_list_naver)
 
         if ( type == 1 ):
             return f"""{self.name}, {self.code}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
@@ -239,6 +274,35 @@ class StockInfo:
     , summary : {self.news_summary}
     , stock news : {news_str}
     , naver news : {naver_news_str}
+"""
+
+
+
+    def getCsvSummary2(self, type=1):
+        # rainbow csv
+        detail = self.getDetail()
+        self.news_ai()
+        company_price = '.'.join(detail.company_price.split(','))
+        upjong_name = '.'.join(detail.upjong_name.split(','))
+        trade_price = detail.trade_price
+
+
+        if ( len(self.__detail.news_list) > 10 ):
+            nn = self.__detail.news_list[:10]
+        else:
+            nn = self.__detail.news_list
+        news_str = '\n      , '.join(str(news) for news in nn)
+        naver_news_str = '\n        , '.join(str(news) for news in self.__detail.news_list_naver)
+
+        if ( type == 1 ):
+            return f"""{self.name}, {self.code}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
+    , keywords : {self.news_keys}
+    , summary : {self.news_summary}
+"""
+        else:
+            return f"""{self.name}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
+    , keywords : {self.news_keys}
+    , summary : {self.news_summary}
 """
 
 
@@ -313,7 +377,9 @@ class StockDetail:
 
 
     def loading(self):
+
         response = requests.get(self.url)
+        self.naver_html = response.text
         soup = BeautifulSoup(response.text, "html.parser")
 
         self.bean = StockDetailSoupObject(self.name, self.code, response.text)
@@ -457,7 +523,8 @@ news2:
 
 
 
-if __name__ == "__main__": # ai 연동을 위한 데이터 가져오기.
+if __name__ == "__main__1": # ai 연동을 위한 데이터 가져오기.
+    dd = dd = datetime.datetime.now().strftime('%Y%m%d')
     name = "삼성전자"
     code = "005930"
      
@@ -467,7 +534,7 @@ if __name__ == "__main__": # ai 연동을 위한 데이터 가져오기.
     if current_folder_name == 'webCrawling':
         os.chdir('invest-scrapper')
 
-    file_path = f"./test_data/stock_{name}_{code}-ai.txt"
+    file_path = f"./test_data/stock_{name}_{code}-{dd}-ai.txt"
     if not os.path.exists(file_path):
         sd = StockDetail(1, name, code)
         key_text = sd.comp_issue_keys()
@@ -481,12 +548,11 @@ if __name__ == "__main__": # ai 연동을 위한 데이터 가져오기.
         with open(file_path, "r") as file:
             html_text = file.read()
 
+    # ai
     print(html_text)
-    keys, summerize = kk.summarize_and_extract_keywords(html_text)
-    print(keys)
-    print(summerize)
-
-
+    # keys, summerize = kk.summarize_and_extract_keywords(html_text)
+    # print(keys)
+    # print(summerize)
 
 
 if __name__ == "__main__2": # 회사정보를 parsing 테스트 할때 사용하는 코드.
@@ -497,13 +563,13 @@ if __name__ == "__main__2": # 회사정보를 parsing 테스트 할때 사용하
     if current_folder_name == 'webCrawling':
         os.chdir('invest-scrapper')
 
-    name = "삼성전자"
-    code = "005930"
-     
     name = "삼성스팩6호"
     code = "425290"
 
-    file_path = f"./test_data/naver_{name}_{code}-html.txt"
+    name = "삼성전자"
+    code = "005930"
+
+    file_path = f"./test_data/naver_{name}_{code}-{dd}-html.txt"
     html_text = ""
 
     if not os.path.exists(file_path):
