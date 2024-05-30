@@ -4,8 +4,10 @@ from bs4 import BeautifulSoup
 
 import code_news
 import comp_news_keyword as kk
+import util.util_common as uc
 
 from enum import Enum
+
 
 
 class MarketType(Enum):
@@ -18,6 +20,23 @@ def getCodeUrl(code):
     return f"https://finance.naver.com/item/main.naver?code={code}"
 
 
+def blind_text(name, soup):
+    # 전일,시가,고가,저가,거래량,거래대금 blind 찾기
+    uc.logger.fatal(f"{name}:tag start")
+    # prev_price_tag = soup.find('div.rate_info', text=lambda text: text and '전일가' in text)
+    # prev_day = soup.select_one(f'div.rate_info table span:contains("{name}")').parent
+    prev_day = soup.select_one(f'div.rate_info table span:-soup-contains("{name}")').parent
+    if prev_day:
+        prev_day = prev_day.select_one('span.blind')
+        if prev_day:
+            prev_day = prev_day.text
+            prev_day = ''.join(prev_day.split(','))
+            uc.logger.fatal(f"{name}:tag find end {prev_day}")
+            return prev_day
+        
+    uc.logger.fatal(f"{name}:tag no find end")
+    return ''
+    
 def getTypeName(type=MarketType.KOSDAK):
     if type == MarketType.KOSDAK:
         return "코스닥"
@@ -41,28 +60,34 @@ class StockDetailSoupObject:
         self.loading()
 
 
+    def get_soup(self):
+        return self.soup
+
+    def find(self, select):
+        return self.soup.find(select)
+
     def select_one(self, select):
         s = self.soup
         h = s.select_one(select)
-        print(f"h={h}")
-        if ( h and h.attrs ):
-            print(f"attrs={h.attrs}")
+        # print(f"h={h}")
+        # if ( h and h.attrs ):
+        #     print(f"attrs={h.attrs}")
         return h
 
 
     def select_one2(self, html, select):
         s = self.soup
         h = html.select_one(select)
-        print(f"h={h}")
-        if ( h and h.attrs ):
-            print(f"attrs={h.attrs}")
+        # print(f"h={h}")
+        # if ( h and h.attrs ):
+        #     print(f"attrs={h.attrs}")
         return h
 
 
     def select(self, select):
         s = self.soup
         h = s.select(select)
-        print(f"h={h}")
+        # print(f"h={h}")
         return h
 
 
@@ -83,13 +108,25 @@ class StockDetailSoupObject:
             self.upjong_name = ""
             self.upjong_code = ""
 
-
     def companyPriceSelect(self):
-        sel = self.select_one('div.today p.no_today em.no_up span.blind')
-        if sel:
-            self.company_price = sel.text
-        else:
-            self.company_price = ''
+        soup = self.get_soup()
+
+
+        # uc.logger.info(f"시총 start")
+        self.company_price = ''
+        tr_tag = soup.select_one('th.th_cop_comp5').parent
+        # uc.logger.debug(tr_tag)
+
+        if tr_tag:
+            td_tag = tr_tag.find("td")
+            if td_tag:
+                pp = td_tag.get_text(strip=True).strip(',')
+                pp = ''.join(pp.split(','))
+                uc.logger.debug(pp)
+                self.company_price = uc.pretty_format_number( pp + '00000000' )
+        # uc.logger.info(f"시총 : {self.company_price}")
+
+
 
         sel_p = self.select_one('div.today p.no_exday em.no_up')
         print("sel_p", sel_p)
@@ -109,24 +146,25 @@ class StockDetailSoupObject:
         else:
             self.company_price_up_per = ''
 
+        # 현재가.
+        # uc.logger.info(f"현재가격:today_price start")
+        self.today_price = ''
+        today_price = self.select_one('div.today p.no_today span.blind')
+        # print('현재가격 찾기...', today_price)
+        if today_price:
+            self.today_price = ''.join(today_price.text.split(','))
+        # uc.logger.info(f"현재가격:{self.today_price}")
 
+        self.price_prev = blind_text('전일', soup)
+        self.price_start = blind_text('시가', soup)
+        self.price_high = blind_text('고가', soup)
+        self.price_low = blind_text('저가', soup)
+        self.trade_amt = blind_text('거래량', soup)
+        self.tradePrice()
+        
     def tradePrice(self):
-        self.trade_price = ""
-        s2 = self.select("table.no_info tr")
-
-        if ( len(s2) > 1 ):
-            tr = s2[1]
-
-            td3 = tr.select("td")
-            if ( len(td3) > 2 ):
-                self.select_one2(td3[2], "em")
-
-                bl = td3[2].select_one("em span.blind")
-                print("bl", bl)
-
-                self.trade_price = bl.text
-                if self.trade_price:
-                    self.trade_price = ".".join(self.trade_price.split(','))
+        self.trade_price = blind_text('거래대금', self.soup)
+        self.trade_price = uc.pretty_format_number(self.trade_price + "000000")
 
 
     def loading(self):
@@ -203,15 +241,18 @@ class StockInfo:
     
 
     def news_ai(self):
-        if ( not self.news_keys):
-            self.news_keys = ""
-            self.news_summary = ""
+        pass
+        # 2024-05-30 : 일단 지금은 사용하지 않는 걸로...
 
-            html_text = self.__detail.comp_issue_keys()
+        # if ( not self.news_keys):
+        #     self.news_keys = ""
+        #     self.news_summary = ""
 
-            keys, summerize = kk.summarize_and_extract_keywords(html_text)
-            self.news_keys = keys
-            self.news_summary = summerize
+        #     html_text = self.__detail.comp_issue_keys()
+
+        #     keys, summerize = kk.summarize_and_extract_keywords(html_text)
+        #     self.news_keys = keys
+        #     self.news_summary = summerize
     
     def getCsvSummaryTitle(type=1):
         
@@ -221,7 +262,7 @@ class StockInfo:
             comp_code = ', 회사코드'
         else:
             comp_code = ''
-        return f"회사명{comp_code}, 업종명, 시총, 상승률, 거래대금, 종합평가, 이슈, 차트분석, {dd}\n"
+        return f"회사명{comp_code}, 업종명, 시총, 상승률, 거래대금, 거래일자, 거래금액, 종합평가, 이슈, 차트분석, {dd}\n"
 
 
     def getSummary(self, type=1):
@@ -247,31 +288,45 @@ class StockInfo:
 
     def getCsvSummary(self, type=1):
         # rainbow csv
+        dd = datetime.datetime.now().strftime('%Y%m%d')
         detail = self.getDetail()
-        self.news_ai()
+        # self.news_ai()
         company_price = '.'.join(detail.company_price.split(','))
         upjong_name = '.'.join(detail.upjong_name.split(','))
         trade_price = detail.trade_price
 
 
-        if ( len(self.__detail.news_list) > 10 ):
-            nn = self.__detail.news_list[:10]
+        if ( len(detail.news_list) > 10 ):
+            nn = detail.news_list[:10]
         else:
-            nn = self.__detail.news_list
+            nn = detail.news_list
         news_str = '\n      , '.join(str(news) for news in nn)
-        naver_news_str = '\n        , '.join(str(news) for news in self.__detail.news_list_naver)
+        naver_news_str = '\n        , '.join(str(news) for news in detail.news_list_naver)
+
+#         if ( type == 1 ):
+#             return f"""{self.name}, {self.code}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
+#     , keywords : {self.news_keys}
+#     , summary : {self.news_summary}
+#     , stock news : {news_str}
+#     , naver news : {naver_news_str}
+# """
+#         else:
+#             return f"""{self.name}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
+#     , keywords : {self.news_keys}
+#     , summary : {self.news_summary}
+#     , stock news : {news_str}
+#     , naver news : {naver_news_str}
+# """
+        trade_dt = dd
+        today_price = detail.today_price
 
         if ( type == 1 ):
-            return f"""{self.name}, {self.code}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
-    , keywords : {self.news_keys}
-    , summary : {self.news_summary}
+            return f"""{self.name}, {self.code}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}, {trade_dt}, {today_price}
     , stock news : {news_str}
     , naver news : {naver_news_str}
 """
         else:
-            return f"""{self.name}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
-    , keywords : {self.news_keys}
-    , summary : {self.news_summary}
+            return f"""{self.name}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}, {trade_dt}, {today_price}
     , stock news : {news_str}
     , naver news : {naver_news_str}
 """
@@ -280,30 +335,39 @@ class StockInfo:
 
     def getCsvSummary2(self, type=1):
         # rainbow csv
+        dd = datetime.datetime.now().strftime('%Y%m%d')
         detail = self.getDetail()
-        self.news_ai()
+        # self.news_ai()
         company_price = '.'.join(detail.company_price.split(','))
         upjong_name = '.'.join(detail.upjong_name.split(','))
         trade_price = detail.trade_price
 
 
-        if ( len(self.__detail.news_list) > 10 ):
-            nn = self.__detail.news_list[:10]
+        if ( len(detail.news_list) > 10 ):
+            nn = detail.news_list[:10]
         else:
-            nn = self.__detail.news_list
+            nn = detail.news_list
         news_str = '\n      , '.join(str(news) for news in nn)
-        naver_news_str = '\n        , '.join(str(news) for news in self.__detail.news_list_naver)
+        naver_news_str = '\n        , '.join(str(news) for news in detail.news_list_naver)
+
+        trade_dt = dd
+        today_price = detail.today_price
 
         if ( type == 1 ):
-            return f"""{self.name}, {self.code}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
-    , keywords : {self.news_keys}
-    , summary : {self.news_summary}
-"""
+            return f"""{self.name}, {self.code}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}, {trade_dt}, {today_price}"""
         else:
-            return f"""{self.name}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
-    , keywords : {self.news_keys}
-    , summary : {self.news_summary}
-"""
+            return f"""{self.name}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}, {trade_dt}, {today_price}"""
+
+#         if ( type == 1 ):
+#             return f"""{self.name}, {self.code}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
+#     , keywords : {self.news_keys}
+#     , summary : {self.news_summary}
+# """
+#         else:
+#             return f"""{self.name}, {upjong_name}, {company_price}, {detail.company_price_up_per}, {trade_price}
+#     , keywords : {self.news_keys}
+#     , summary : {self.news_summary}
+# """
 
 
 class StockDetail:
@@ -318,7 +382,7 @@ class StockDetail:
 
     def to_file(self):
         dd = datetime.datetime.now().strftime('%Y%m%d')
-        file_name = f"./stock_info/d{dd}/{self.code}_{self.name}_{dd}.txt"
+        file_name = f"{uc.base_data_path}/stock_info/d{dd}/{self.code}_{self.name}_{dd}.txt"
         dir = os.path.dirname(file_name)
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -329,7 +393,7 @@ class StockDetail:
 
     def to_md_file(self):
         dd = datetime.datetime.now().strftime('%Y%m%d')
-        file_name = f"./stock_info/d{dd}/{self.code}_{self.name}_{dd}.md"
+        file_name = f"{uc.base_data_path}/stock_info/d{dd}/{self.code}_{self.name}_{dd}.md"
         dir = os.path.dirname(file_name)
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -340,7 +404,7 @@ class StockDetail:
 
     def to_md_file2(self):
         dd = datetime.datetime.now().strftime('%Y%m%d')
-        file_name = f"./stock_info/s{dd}/{self.code}_{self.name}_{dd}.md"
+        file_name = f"{uc.base_data_path}/stock_info/s{dd}/{self.code}_{self.name}_{dd}.md"
         dir = os.path.dirname(file_name)
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -351,19 +415,29 @@ class StockDetail:
 
     def save_file_common(self, url, type):
         dd = datetime.datetime.now().strftime('%Y%m%d')
-        response = requests.get(url)
-        if response.status_code == 200:
-            file_name = f"./stock_info/d{dd}/{self.code}_{self.name}_{dd}_{type}.png"
-            dir = os.path.dirname(file_name)
-            if not os.path.exists(dir):
-                os.makedirs(dir)
-            
-            with open(file_name, 'wb') as file:
-                file.write(response.content)
-            print(f"이미지 다운로드가 완료되었습니다.({type})")
-        else:
-            print(f"이미지를 다운로드할 수 없습니다.({type})")
+        ddhh = datetime.datetime.now().strftime('%Y%m%d%H')
+
+        file_name_dh = f"{uc.base_data_path}/stock_info/d{dd}/{self.code}_{self.name}_{ddhh}_{type}.png"
+        file_name = f"{uc.base_data_path}/stock_info/d{dd}/{self.code}_{self.name}_{dd}_{type}.png"
         
+        if os.path.exists(file_name_dh):
+            uc.logger.debug("img down pass")
+            pass
+        else:
+            uc.logger.debug("img down ing")
+            response = requests.get(url)
+            if response.status_code == 200:
+                dir = os.path.dirname(file_name)
+                if not os.path.exists(dir):
+                    os.makedirs(dir)
+                with open(file_name_dh, 'w') as file:
+                    file.write('') # 빈파일 생성 캐쉬용.
+                with open(file_name, 'wb') as file:
+                    file.write(response.content)
+                print(f"이미지 다운로드가 완료되었습니다.({type})")
+            else:
+                print(f"이미지를 다운로드할 수 없습니다.({type})")
+            
 
     def save_chart_day_candle(self):
         dd = datetime.datetime.now().strftime('%Y%m%d')
@@ -377,12 +451,20 @@ class StockDetail:
 
 
     def loading(self):
+        nn = datetime.datetime.now() # 현재 시간.
+        dd = nn.strftime('%Y%m%d') # 현재 작업일자.
+        ddhh = nn.strftime('%Y%m%d%H') # 일단 시간단위로...
 
-        response = requests.get(self.url)
-        self.naver_html = response.text
-        soup = BeautifulSoup(response.text, "html.parser")
+        def get_stock_html():
+            url = getCodeUrl(self.code)
+            response = requests.get(url)
+            return response.text
+        
+        self.naver_html = uc.file_cache_write(f"/naver_page/{dd}/stock_{self.name}_{self.code}-{ddhh}-source.txt", get_stock_html )
+        
+        soup = BeautifulSoup(self.naver_html, "html.parser")
 
-        self.bean = StockDetailSoupObject(self.name, self.code, response.text)
+        self.bean = StockDetailSoupObject(self.name, self.code, self.naver_html)
         b = self.bean
 
         self.upjong_name = b.upjong_name
@@ -401,6 +483,7 @@ class StockDetail:
         self.company_price_up_per = b.company_price_up_per
 
         self.trade_price = b.trade_price
+        self.today_price = b.today_price
 
 
     def __str__(self):
@@ -523,6 +606,21 @@ news2:
 
 
 
+if __name__ == "__main__11": # ai 
+    # local html save & load
+    dd = dd = datetime.datetime.now().strftime('%Y%m%d')
+    name = "삼성전자"
+    code = "005930"
+
+    def get_stock_html():
+        url = getCodeUrl(code)
+        response = requests.get(url)
+        return response.text
+     
+    html = uc.file_cache_write(f"/test_data/stock_{name}_{code}-{dd}-source.txt", get_stock_html )
+    
+
+
 if __name__ == "__main__1": # ai 연동을 위한 데이터 가져오기.
     dd = dd = datetime.datetime.now().strftime('%Y%m%d')
     name = "삼성전자"
@@ -534,8 +632,9 @@ if __name__ == "__main__1": # ai 연동을 위한 데이터 가져오기.
     if current_folder_name == 'webCrawling':
         os.chdir('invest-scrapper')
 
-    file_path = f"./test_data/stock_{name}_{code}-{dd}-ai.txt"
+    file_path = f"./test_data/stock_{name}_{code}-{dd}-source.txt"
     if not os.path.exists(file_path):
+        uc.logger.debug(f"no file {file_path}")
         sd = StockDetail(1, name, code)
         key_text = sd.comp_issue_keys()
 
@@ -545,6 +644,7 @@ if __name__ == "__main__1": # ai 연동을 위한 데이터 가져오기.
 
         html_text = key_text
     else:
+        uc.logger.debug(f"exists file {file_path}")
         with open(file_path, "r") as file:
             html_text = file.read()
 
@@ -586,3 +686,15 @@ if __name__ == "__main__2": # 회사정보를 parsing 테스트 할때 사용하
     sdso = StockDetailSoupObject(name, code, html_text)
     print(sdso)
 
+
+if __name__ == "__main__": # ai 
+    dd = dd = datetime.datetime.now().strftime('%Y%m%d')
+    name = "삼성전자"
+    code = "005930"
+    sd = StockDetail(1, name, code)
+
+    # print("종가:", sd.today_price)
+
+    # sd.to_md_file()
+    # print(sd.to_file())
+    # print(sd.to_md_file2())

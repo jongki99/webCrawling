@@ -103,17 +103,29 @@ def file_cache_write(file_path, func_text_return=None):
     check_and_create_folder(file_path)
 
     if not os.path.exists(file_path):
-        logger.info("none file_path=%s", file_path)
+        # logger.info("none file_path=%s", file_path)
         text = func_text_return()
         # w 덮어쓰기, a 추가하기.
         with open(file_path, "w") as file: 
             file.write(text)
     else:
-        logger.info("exists file_path=%s", file_path)
+        # logger.info("exists file_path=%s", file_path)
         with open(file_path, "r") as file:
             text = file.read()
 
     return text
+
+
+def pretty_format_number(number):
+    # print(type(number))
+    if ( type(number) == str ):
+        number = int(number)
+    # if number < 10**8:  # 1억 미만의 경우
+    #     return f"{number:,}"
+    if number < 10**12:  # 1조 미만의 경우
+        return f"{number // 10**8}억"
+    else:  # 1조 이상의 경우
+        return f"{number // 10**12}조 {number % 10**12 // 10**8}억"
 
 
 if __name__ == "__main__": # 회사정보를 parsing 테스트 할때 사용하는 코드.

@@ -1,7 +1,8 @@
 import requests, re, datetime, time, os
 from bs4 import BeautifulSoup
 
-import code_news, stock_info as si
+import code_news
+import stock_info
 from stock_info import MarketType
 
 
@@ -12,7 +13,7 @@ def getStockCode(url):
 
 def get_stock_details(url, type=MarketType.KOSDAK):
 
-    print("start loading...", si.getTypeName(type))
+    print("start loading...", stock_info.getTypeName(type))
 
     stockList = []
 
@@ -37,7 +38,7 @@ def get_stock_details(url, type=MarketType.KOSDAK):
             # print("상세 페이지:", stock_url, "종목:", link.text, "등락률:", stock_raise_per)
             # 여기서 해당 링크를 이용하여 상세 정보를 수집하는 코드를 추가할 수 있습니다.
 
-            stock = si.StockInfo(type, link.text, stock_code)
+            stock = stock_info.StockInfo(type, link.text, stock_code)
             stockList.append(stock)
     
     return stockList
@@ -133,7 +134,7 @@ def merge_txt_order_sum(stocks, type=1):
     file_name = os.path.join(path, f"./comp_sum/ss{type}_{dd}.csv")
 
     with open(file_name, 'w') as list_file:
-        list_file.write(si.StockInfo.getCsvSummaryTitle(type))
+        list_file.write(stock_info.StockInfo.getCsvSummaryTitle(type))
         list_file.write('\n')
 
         # 디렉토리 내의 모든 파일에 대해 반복
@@ -143,7 +144,7 @@ def merge_txt_order_sum(stocks, type=1):
             list_file.write('\n')
 
     with open(file_name_csv, 'w') as list_file:
-        list_file.write(si.StockInfo.getCsvSummaryTitle(type))
+        list_file.write(stock_info.StockInfo.getCsvSummaryTitle(type))
         list_file.write('\n')
 
         # 디렉토리 내의 모든 파일에 대해 반복
@@ -166,7 +167,7 @@ def merge_txt_order_sum2(stocks, type=1):
     file_name = os.path.join(path, f"./comp_sum/sss{type}_{dd}.csv")
 
     with open(file_name, 'w') as list_file:
-        list_file.write(si.StockInfo.getCsvSummaryTitle(type))
+        list_file.write(stock_info.StockInfo.getCsvSummaryTitle(type))
         list_file.write('\n')
 
         # 디렉토리 내의 모든 파일에 대해 반복
@@ -179,7 +180,7 @@ def merge_txt_order_sum2(stocks, type=1):
 
 def getDetailTest():
 #    stock = StockInfo(1, "SOL 유럽탄소배출권선물S&P(H)", "400580")
-    stock = si.StockInfo(1, "CJ대한통운", "000120")
+    stock = stock_info.StockInfo(1, "CJ대한통운", "000120")
     stock.toPrint()
     #stock.save_md()
 
