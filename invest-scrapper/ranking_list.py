@@ -5,15 +5,17 @@ import code_news
 import stock_info
 from stock_info import MarketType
 
+import util.util_common as uc
+
 
 def getStockCode(url):
     code = re.search(r'code=(\d+)', url).group(1)
     return code
 
 
-def get_stock_details(url, type=MarketType.KOSDAK):
+def get_stock_details(url, market_type=MarketType.KOSDAK):
 
-    print("start loading...", stock_info.getTypeName(type))
+    print("start loading...", stock_info.getTypeName(market_type))
 
     stockList = []
 
@@ -46,9 +48,9 @@ def get_stock_details(url, type=MarketType.KOSDAK):
 
 def getTop40():
     url = "https://finance.naver.com/sise/sise_rise.naver?sosok=1" # 코스닥.
-    stockList = get_stock_details(url, 1)
+    stockList = get_stock_details(url, MarketType.KOSDAK)
     url = "https://finance.naver.com/sise/sise_rise.naver?sosok=0" # 코스피.
-    stockList = stockList + get_stock_details(url, 0)
+    stockList = stockList + get_stock_details(url, MarketType.KOSPI)
 
     return stockList
 
@@ -61,8 +63,8 @@ def getTop40_main():
 
 def merge_txt():
     dd = datetime.datetime.now().strftime('%Y%m%d')
-    file_name = f"./stock_info/d{dd}.txt"
-    source_dir = f"./stock_info/d{dd}/"
+    file_name = f"{uc.base_data_path}/stock_info/d{dd}.txt"
+    source_dir = f"{uc.base_data_path}/stock_info/d{dd}/"
 
     with open(file_name, 'w') as list_file:
         # 디렉토리 내의 모든 파일에 대해 반복
@@ -76,8 +78,8 @@ def merge_txt():
 
 def merge_txt_order(stocks):
     dd = datetime.datetime.now().strftime('%Y%m%d')
-    file_name = f"./stock_info/d{dd}.txt"
-    source_dir = f"./stock_info/d{dd}/"
+    file_name = f"{uc.base_data_path}/stock_info/d{dd}.txt"
+    source_dir = f"{uc.base_data_path}/stock_info/d{dd}/"
 
     with open(file_name, 'w') as list_file:
         # 디렉토리 내의 모든 파일에 대해 반복
@@ -91,8 +93,10 @@ def merge_txt_order(stocks):
 
 def merge_txt_order_md2(stocks):
     dd = datetime.datetime.now().strftime('%Y%m%d')
-    file_name = f"./stock_info/s{dd}.md"
-    source_dir = f"./stock_info/s{dd}/"
+    file_name = f"{uc.base_data_path}/stock_info/s{dd}.md"
+    source_dir = f"{uc.base_data_path}/stock_info/s{dd}/"
+    if not os.path.exists(source_dir):
+        os.makedirs(source_dir)
 
     with open(file_name, 'w') as list_file:
         list_file.write(f"# top40 daily : {dd}\n")
@@ -107,8 +111,8 @@ def merge_txt_order_md2(stocks):
 
 def merge_txt_order_md(stocks):
     dd = datetime.datetime.now().strftime('%Y%m%d')
-    file_name = f"./stock_info/d{dd}.md"
-    source_dir = f"./stock_info/d{dd}/"
+    file_name = f"{uc.base_data_path}/stock_info/d{dd}.md"
+    source_dir = f"{uc.base_data_path}/stock_info/d{dd}/"
 
     with open(file_name, 'w') as list_file:
         list_file.write(f"# top40 daily : {dd}\n")
