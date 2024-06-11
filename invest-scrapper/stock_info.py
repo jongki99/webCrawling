@@ -22,7 +22,7 @@ def getCodeUrl(code):
 
 def blind_text(name, soup):
     # 전일,시가,고가,저가,거래량,거래대금 blind 찾기
-    uc.logger.fatal(f"{name}:tag start")
+    # uc.logger.fatal(f"{name}:tag start")
     # prev_price_tag = soup.find('div.rate_info', text=lambda text: text and '전일가' in text)
     # prev_day = soup.select_one(f'div.rate_info table span:contains("{name}")').parent
     prev_day = soup.select_one(f'div.rate_info table span:-soup-contains("{name}")').parent
@@ -31,10 +31,10 @@ def blind_text(name, soup):
         if prev_day:
             prev_day = prev_day.text
             prev_day = ''.join(prev_day.split(','))
-            uc.logger.fatal(f"{name}:tag find end {prev_day}")
+            # uc.logger.fatal(f"{name}:tag find end {prev_day}")
             return prev_day
         
-    uc.logger.fatal(f"{name}:tag no find end")
+    # uc.logger.fatal(f"{name}:tag no find end")
     return ''
     
 def getTypeName(type=MarketType.KOSDAK):
@@ -112,19 +112,19 @@ class StockDetailSoupObject:
         soup = self.get_soup()
 
 
-        # uc.logger.info(f"시총 start")
+        uc.logger.info(f"현재가. 3가지 -+0 start")
         self.company_price = ''
-        tr_tag = soup.select_one('th.th_cop_comp5').parent
-        # uc.logger.debug(tr_tag)
+        tr_tag = soup.select_one('p.no_today')
+        uc.logger.debug(f"현재가 : {tr_tag}")
 
         if tr_tag:
-            td_tag = tr_tag.find("td")
+            td_tag = tr_tag.select_one("span.blind")
             if td_tag:
                 pp = td_tag.get_text(strip=True).strip(',')
                 pp = ''.join(pp.split(','))
                 uc.logger.debug(pp)
-                self.company_price = uc.pretty_format_number( pp + '00000000' )
-        # uc.logger.info(f"시총 : {self.company_price}")
+                self.company_price = pp
+        uc.logger.info(f"현재가 : {self.company_price}")
 
 
 
@@ -173,6 +173,7 @@ class StockDetailSoupObject:
 
         self.market_sum = self.select_one('#_market_sum').text.strip().strip(' ') + ' 억원'
         self.market_sum = " ".join(self.market_sum.split())
+        # print('self.market_sum', self.market_sum)
 
         self.companyPriceSelect()
 
@@ -471,7 +472,7 @@ class StockDetail:
         self.upjong_code = b.upjong_code
 
 
-        self.market_sum = b.market_name
+        self.market_sum = b.market_sum
 
         self.news_list = code_news.getNaverCodeNewsList(self.code)
         self.date = datetime.datetime.now()
@@ -550,6 +551,24 @@ news2:
         else:
             upjong_str = ""
 
+        sample = f"""
+
+차트 이미지: https://ssl.pstatic.net/imgfinance/chart/item/candle/day/033790.png
+차트 이미지 d: 
+
+![{self.code}_{self.name}_{dd}.png](./{self.code}_{self.name}_{dd}_d.png)
+
+차트 이미지 w: 
+
+![{self.code}_{self.name}_{dd}.png](./{self.code}_{self.name}_{dd}_w.png)
+
+차트 이미지 m: 
+
+![{self.code}_{self.name}_{dd}.png](./{self.code}_{self.name}_{dd}_m.png)
+
+"""
+        
+
         return f"""
 ## {typeName} : [{self.name}({self.code})]({self.url})
 
@@ -558,6 +577,14 @@ news2:
     거래대금 : {self.trade_price}
     금일 가격 : {self.company_price}, 전일대비 {self.company_price_up}, 상승율 {self.company_price_up_per}
     기업개요 : {self.company_info}
+
+*****
+
+![{self.code}_{self.name}_{dd}.png](./d{dd}/{self.code}_{self.name}_{dd}_d.png)
+
+![{self.code}_{self.name}_{dd}.png](./d{dd}/{self.code}_{self.name}_{dd}_w.png)
+
+![{self.code}_{self.name}_{dd}.png](./d{dd}/{self.code}_{self.name}_{dd}_m.png)
 
 *****
 
@@ -576,31 +603,6 @@ news2:
 {naver_new_str}
 
 *****
-
-차트 이미지: https://ssl.pstatic.net/imgfinance/chart/item/candle/day/033790.png
-차트 이미지 d: 
-
-![{self.code}_{self.name}_{dd}.png](./{self.code}_{self.name}_{dd}_d.png)
-
-차트 이미지 w: 
-
-![{self.code}_{self.name}_{dd}.png](./{self.code}_{self.name}_{dd}_w.png)
-
-차트 이미지 m: 
-
-![{self.code}_{self.name}_{dd}.png](./{self.code}_{self.name}_{dd}_m.png)
-
-차트 이미지 d: 
-
-![{self.code}_{self.name}_{dd}.png](./d{dd}/{self.code}_{self.name}_{dd}_d.png)
-
-차트 이미지 w: 
-
-![{self.code}_{self.name}_{dd}.png](./d{dd}/{self.code}_{self.name}_{dd}_w.png)
-
-차트 이미지 m: 
-
-![{self.code}_{self.name}_{dd}.png](./d{dd}/{self.code}_{self.name}_{dd}_m.png)
 
 """
 
