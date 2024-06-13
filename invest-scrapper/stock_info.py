@@ -25,8 +25,9 @@ def blind_text(name, soup):
     # uc.logger.fatal(f"{name}:tag start")
     # prev_price_tag = soup.find('div.rate_info', text=lambda text: text and '전일가' in text)
     # prev_day = soup.select_one(f'div.rate_info table span:contains("{name}")').parent
-    prev_day = soup.select_one(f'div.rate_info table span:-soup-contains("{name}")').parent
+    prev_day = soup.select_one(f'div.rate_info table span:-soup-contains("{name}")')
     if prev_day:
+        prev_day = prev_day.parent
         prev_day = prev_day.select_one('span.blind')
         if prev_day:
             prev_day = prev_day.text
@@ -94,10 +95,11 @@ class StockDetailSoupObject:
     #############################################################################################
 
     def marketName(self):
+        self.market_name = ''
         h = self.select_one('div.description img')
-        self.market_name = h.attrs['alt']
+        if h:
+            self.market_name = h.attrs['alt']
     
-
     def upjongName(self):
         trade_compare = self.select_one('div.trade_compare')
         if trade_compare:

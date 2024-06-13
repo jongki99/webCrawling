@@ -19,7 +19,9 @@ def get_stock_details(url, market_type=MarketType.KOSDAK):
 
     stockList = []
 
-    if ( type == MarketType.KOSDAK ):
+    print ( market_type )
+
+    if ( market_type == MarketType.KOSDAK ):
         max_count = 30
     else:
         max_count = 10
@@ -40,7 +42,7 @@ def get_stock_details(url, market_type=MarketType.KOSDAK):
             # print("상세 페이지:", stock_url, "종목:", link.text, "등락률:", stock_raise_per)
             # 여기서 해당 링크를 이용하여 상세 정보를 수집하는 코드를 추가할 수 있습니다.
 
-            stock = stock_info.StockInfo(type, link.text, stock_code)
+            stock = stock_info.StockInfo(market_type, link.text, stock_code)
             stockList.append(stock)
     
     return stockList
