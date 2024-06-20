@@ -75,10 +75,11 @@ def read_csv_file(file_path):
 
             name = row[0]
             code = get_invest_code(name)
+            print(f"company={name} code={code}")
+
             if code:
                 stock = st.StockInfo(2, name, code)
                 stockList.append(stock)
-                print(f"company={name} code={code}")
     if stockList:
         
         for index, stock in enumerate(stockList):
