@@ -99,6 +99,29 @@ def read_csv_file(file_path):
 #    except Exception as e:
 #        print("오류 발생:", e, e)
 
+stocks = f"""
+한화손해보험
+현대해상
+DB손해보험
+기업은행
+세진중공업
+테크윙
+씨앤씨인터내셔널
+
+삼성증권
+HD현대
+사조씨푸드
+
+이수페타시스, 전자장비와기기, 56700, , 1307억, 20240701, 56700
+동방, 항공화물운송과물류, 3215, , 102억, 20240701, 3215
+제이앤티씨, 핸드셋, 28500, , 258억, 20240701, 28500
+펩트론, 생물공학, 58300, +18.14, 3199억, 20240701, 58300
+HD한국조선해양, 조선, 159900, +0.69, 266억, 20240701, 159900
+제룡전기, 전기장비, 82300, , 1352억, 20240701, 82300
+테크윙, 반도체와반도체장비, 57700, , 926억, 20240701, 57700
+웨이버스, IT서비스, 1678, , 46억, 20240701, 1678
+"""
+
 
 if __name__ == "__main__":
     # file_path = input("CSV 파일 경로를 입력하세요: ")
@@ -114,9 +137,12 @@ if __name__ == "__main__":
 
     path = os.getcwd()
 
-    file_path = os.path.join(path, f"company_name_csv/s{dd}.csv")
+    file_path = os.path.join(path, f"company_name_csv/s{dd}-2.csv")
 
     print(file_path)
+
+    with open(file_path, 'w', newline='') as file:
+        file.write(stocks)
 
     read_csv_file(file_path)
 
