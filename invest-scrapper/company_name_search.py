@@ -65,7 +65,7 @@ def get_invest_code(company_name):
 def read_csv_file(file_path):
     stockList = []
 #    try:
-    with open(file_path, 'r', newline='') as file:
+    with open(file_path, 'r', newline='', encoding='utf-8') as file:
         reader = csv.reader(file)
         for row in reader:
             if not row:
@@ -100,6 +100,31 @@ def read_csv_file(file_path):
 #        print("오류 발생:", e, e)
 
 stocks = f"""
+
+,9/3, 화
+갤럭시아머니트리
+뱅크웨어글로벌
+라메디텍
+"""
+
+stocks1 = f"""
+
+,9/3, 화
+갤럭시아머니트리
+뱅크웨어글로벌
+라메디텍
+
+KCTC
+한국정보인증
+위메이드맥스
+케이옥션
+이브이첨단소재
+에이디테크놀로지
+브릿지바이오테라퓨틱스
+
+,9/2, 월
+
+
 ,8,30 금
 이엔셀
 라메디텍
@@ -172,7 +197,7 @@ if __name__ == "__main__":
 
     print(file_path)
 
-    with open(file_path, 'w', newline='') as file:
+    with open(file_path, 'w', newline='', encoding='utf-8') as file:
         file.write(stocks)
 
     read_csv_file(file_path)

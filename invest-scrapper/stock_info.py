@@ -390,7 +390,7 @@ class StockDetail:
         if not os.path.exists(dir):
             os.makedirs(dir)
         
-        with open(file_name, 'w') as file:
+        with open(file_name, 'w', encoding='utf-8') as file:
             file.write(str(self))
             self.save_chart_day_candle()
 
@@ -401,7 +401,7 @@ class StockDetail:
         if not os.path.exists(dir):
             os.makedirs(dir)
         
-        with open(file_name, 'w') as file:
+        with open(file_name, 'w', encoding='utf-8') as file:
             file.write(str(self.md_format()))
             self.save_chart_day_candle()
 
@@ -412,7 +412,7 @@ class StockDetail:
         if not os.path.exists(dir):
             os.makedirs(dir)
         
-        with open(file_name, 'w') as file:
+        with open(file_name, 'w', encoding='utf-8') as file:
             file.write(str(self.md_format()))
             self.save_chart_day_candle()
 
@@ -433,7 +433,7 @@ class StockDetail:
                 dir = os.path.dirname(file_name)
                 if not os.path.exists(dir):
                     os.makedirs(dir)
-                with open(file_name_dh, 'w') as file:
+                with open(file_name_dh, 'w', encoding='utf-8') as file:
                     file.write('') # 빈파일 생성 캐쉬용.
                 with open(file_name, 'wb') as file:
                     file.write(response.content)
@@ -643,13 +643,13 @@ if __name__ == "__main__1": # ai 연동을 위한 데이터 가져오기.
         key_text = sd.comp_issue_keys()
 
         # w 덮어쓰기, a 추가하기.
-        with open(file_path, "w") as file: 
+        with open(file_path, "w", encoding='utf-8') as file: 
             file.write(key_text)
 
         html_text = key_text
     else:
         uc.logger.debug(f"exists file {file_path}")
-        with open(file_path, "r") as file:
+        with open(file_path, "r", encoding='utf-8') as file:
             html_text = file.read()
 
     # ai
@@ -679,12 +679,12 @@ if __name__ == "__main__2": # 회사정보를 parsing 테스트 할때 사용하
     if not os.path.exists(file_path):
         response = requests.get(f"https://finance.naver.com/item/main.naver?code={code}")
         # w 덮어쓰기, a 추가하기.
-        with open(file_path, "w") as file: 
+        with open(file_path, "w", encoding='utf-8') as file: 
             file.write(response.text)
 
         html_text = response.text
     else:
-        with open(file_path, "r") as file:
+        with open(file_path, "r", encoding='utf-8') as file:
             html_text = file.read()
 
     sdso = StockDetailSoupObject(name, code, html_text)

@@ -16,7 +16,7 @@ import requests, re, datetime, time, os
 import logging
 
 
-base_data_path = os.getenv("MY_INVEST_DATA_PATH")
+base_data_path = os.getenv("MY_INVEST_DATA_PATH", "C:\work\webCrawling\data")
 
 # log_format = '%(asctime)s [%(filename)s:%(lineno)s|%(levelname)s] %(funcName)s(): %(message)s'
 # logging.basicConfig(format=log_format, level=logging.DEBUG)
@@ -106,11 +106,11 @@ def file_cache_write(file_path, func_text_return=None):
         # logger.info("none file_path=%s", file_path)
         text = func_text_return()
         # w 덮어쓰기, a 추가하기.
-        with open(file_path, "w") as file: 
+        with open(file_path, "w", encoding='utf-8') as file: 
             file.write(text)
     else:
         # logger.info("exists file_path=%s", file_path)
-        with open(file_path, "r") as file:
+        with open(file_path, "r", encoding='utf-8') as file:
             text = file.read()
 
     return text

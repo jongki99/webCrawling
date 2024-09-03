@@ -68,13 +68,13 @@ def merge_txt():
     file_name = f"{uc.base_data_path}/stock_info/d{dd}.txt"
     source_dir = f"{uc.base_data_path}/stock_info/d{dd}/"
 
-    with open(file_name, 'w') as list_file:
+    with open(file_name, 'w', encoding='utf-8') as list_file:
         # 디렉토리 내의 모든 파일에 대해 반복
         for 파일명 in os.listdir(source_dir):
             # .txt 파일만 대상으로 함
             if 파일명.endswith('.txt'):
                 # 파일을 읽어와 결과 파일에 쓰기
-                with open(os.path.join(source_dir, 파일명), 'r') as 파일:
+                with open(os.path.join(source_dir, 파일명), 'r', encoding='utf-8') as 파일:
                     list_file.write(파일.read())
                     list_file.write('\n\n\n====================n')  # 각 파일 사이에 개행 추가
 
@@ -83,12 +83,12 @@ def merge_txt_order(stocks):
     file_name = f"{uc.base_data_path}/stock_info/d{dd}.txt"
     source_dir = f"{uc.base_data_path}/stock_info/d{dd}/"
 
-    with open(file_name, 'w') as list_file:
+    with open(file_name, 'w', encoding='utf-8') as list_file:
         # 디렉토리 내의 모든 파일에 대해 반복
         for stock in stocks:
             파일명 = os.path.join(source_dir, f"{stock.code}_{stock.name}_{dd}.txt")
             # 파일을 읽어와 결과 파일에 쓰기
-            with open(파일명, 'r') as 파일:
+            with open(파일명, 'r', encoding='utf-8') as 파일:
                 list_file.write(파일.read())
                 list_file.write('\n\n\n=========================n')  # 각 파일 사이에 개행 추가
 
@@ -100,14 +100,14 @@ def merge_txt_order_md2(stocks):
     if not os.path.exists(source_dir):
         os.makedirs(source_dir)
 
-    with open(file_name, 'w') as list_file:
+    with open(file_name, 'w', encoding='utf-8') as list_file:
         list_file.write(f"# top40 daily : {dd}\n")
         # 디렉토리 내의 모든 파일에 대해 반복
         for stock in stocks:
-            파일명 = os.path.join(source_dir, f"{stock.code}_{stock.name}_{dd}.md")
+            dd_file_path = os.path.join(source_dir, f"{stock.code}_{stock.name}_{dd}.md")
             # 파일을 읽어와 결과 파일에 쓰기
-            with open(파일명, 'r') as 파일:
-                list_file.write(파일.read())
+            with open(dd_file_path, 'r', encoding='utf-8') as dd_file_name:
+                list_file.write(dd_file_name.read())
                 list_file.write('\n')  # 각 파일 사이에 개행 추가
 
 
@@ -116,13 +116,13 @@ def merge_txt_order_md(stocks):
     file_name = f"{uc.base_data_path}/stock_info/d{dd}.md"
     source_dir = f"{uc.base_data_path}/stock_info/d{dd}/"
 
-    with open(file_name, 'w') as list_file:
+    with open(file_name, 'w', encoding='utf-8') as list_file:
         list_file.write(f"# top40 daily : {dd}\n")
         # 디렉토리 내의 모든 파일에 대해 반복
         for stock in stocks:
             파일명 = os.path.join(source_dir, f"{stock.code}_{stock.name}_{dd}.md")
             # 파일을 읽어와 결과 파일에 쓰기
-            with open(파일명, 'r') as 파일:
+            with open(파일명, 'r', encoding='utf-8') as 파일:
                 list_file.write(파일.read())
                 list_file.write('\n')  # 각 파일 사이에 개행 추가
 
@@ -139,7 +139,7 @@ def merge_txt_order_sum(stocks, type=1):
     file_name_csv = os.path.join(path, f"./comp_sum/s{type}_{dd}.csv")
     file_name = os.path.join(path, f"./comp_sum/ss{type}_{dd}.csv")
 
-    with open(file_name, 'w') as list_file:
+    with open(file_name, 'w', encoding='utf-8') as list_file:
         list_file.write(stock_info.StockInfo.getCsvSummaryTitle(type))
         list_file.write('\n')
 
@@ -149,7 +149,7 @@ def merge_txt_order_sum(stocks, type=1):
             list_file.write(stock.getCsvSummary(type))
             list_file.write('\n')
 
-    with open(file_name_csv, 'w') as list_file:
+    with open(file_name_csv, 'w', encoding='utf-8') as list_file:
         list_file.write(stock_info.StockInfo.getCsvSummaryTitle(type))
         list_file.write('\n')
 
@@ -172,7 +172,7 @@ def merge_txt_order_sum2(stocks, type=1):
     path = os.getcwd()
     file_name = os.path.join(path, f"./comp_sum/sss{type}_{dd}.csv")
 
-    with open(file_name, 'w') as list_file:
+    with open(file_name, 'w', encoding='utf-8') as list_file:
         list_file.write(stock_info.StockInfo.getCsvSummaryTitle(type))
         list_file.write('\n')
 
