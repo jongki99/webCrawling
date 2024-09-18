@@ -1,0 +1,45 @@
+user.script.and.css
+
+// 2024 09 11, toonkor435.com
+
+curr_url = document.location.href;
+if ( curr_url.includes('toonkor') ) {
+	// toonkor 사이트에서 동작.
+	
+	if ( curr_url.includes('%ED%99%94.html') ) {
+		// 상세 일때 자동로그인 한다.
+			$('#ol_id').val('jongki99');
+			$('#ol_pw').val('1234!@#$');
+			$('button[type="submit"].btn:contains("Login")').trigger('click');
+	}
+		
+	
+	$(document).ready(function() {
+		$(document).on('click', function(ev) {
+			$('nav').toggle();
+		})
+		$(document).on('keydown', function(ev) {
+			console.log('keypress event', ev);
+			if ( ev.keyCode == 39 ) { // right, next page.
+				$('div.btn-next a span').trigger('click');
+			}
+			if ( ev.keyCode == 37 ) { // left, prev page.
+				$('div.btn-prev a span').trigger('click');
+			}
+			if ( ev.keyCode == 38 ) { // up, menu hide.
+				$('div.contents').trigger('click');
+			}
+			if ( ev.keyCode == 40 ) { // down, goto list page
+				$('a i.fa-list').trigger('click');
+			}
+			
+			if ( ev.ctrlKey && ev.shiftKey && ev.keyCode === 76 ) {
+				$('#ol_id').val('jongki99');
+				$('#ol_pw').val('1234!@#$');
+				$('button[type="submit"].btn:contains("Login")').trigger('click');
+			}
+		})
+	});
+		
+}
+
