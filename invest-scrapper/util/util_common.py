@@ -109,7 +109,7 @@ def file_cache_write(file_path, func_text_return=None):
         with open(file_path, "w", encoding='utf-8') as file: 
             file.write(text)
     else:
-        # logger.info("exists file_path=%s", file_path)
+        logger.info("exists file_path=%s", file_path)
         with open(file_path, "r", encoding='utf-8') as file:
             text = file.read()
 

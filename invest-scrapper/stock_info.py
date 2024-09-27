@@ -394,6 +394,15 @@ class StockDetail:
             file.write(str(self))
             self.save_chart_day_candle()
 
+    def to_file_memo(self):
+        dd = datetime.datetime.now().strftime('%Y%m%d')
+        file_name = f"{uc.base_data_path}/stock_data/stock-{dd}/{self.code}_{self.name}_{dd}.txt"
+        dir = os.path.dirname(file_name)
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        with open(file_name, 'w', encoding='utf-8') as file:
+            file.write(str(self.memo_format()))
+
     def to_md_file(self):
         dd = datetime.datetime.now().strftime('%Y%m%d')
         file_name = f"{uc.base_data_path}/stock_info/d{dd}/{self.code}_{self.name}_{dd}.md"
@@ -444,6 +453,8 @@ class StockDetail:
 
     def save_chart_day_candle(self):
         dd = datetime.datetime.now().strftime('%Y%m%d')
+        url = f"https://ssl.pstatic.net/imgfinance/chart/item/area/week/{self.code}.png"
+        self.save_file_common(url, 'wd')
         url = f"https://ssl.pstatic.net/imgfinance/chart/item/candle/day/{self.code}.png"
         self.save_file_common(url, 'd')
         url = f"https://ssl.pstatic.net/imgfinance/chart/item/candle/week/{self.code}.png"
@@ -540,6 +551,36 @@ news1:
 news2:
 {naver_new_str}
 """
+    
+    def memo_format(self):
+        dd = datetime.datetime.now().strftime('%Y%m%d')
+        typeName = getTypeName(self.type)
+        news_str = '\n'.join(str(news.md_format()) for news in self.news_list)
+        naver_new_str = '\n'.join(str(news.md_format()) for news in self.news_list_naver)
+
+        stock_trade_rate = 10
+        frighner_rate = 10
+        main_name = "대주주"
+        main_holding_rate = f"{main_name} = 10"
+
+        if ( self.upjong_name ):
+            upjong_str = f"업종 : {self.upjong_name}({self.upjong_code})"
+        else:
+            upjong_str = ""
+
+        return f"""테마: {self.upjong_name}
+
+[{dd}] 특징주,
+거래대금({dd}) : {self.trade_price}
+
+시총 : {self.market_sum}
+유동 비율 : {stock_trade_rate}
+외국인 지분율 : {frighner_rate}
+대주주 지분율 : {main_holding_rate}
+
+회사소개 : {self.company_info}
+"""
+
 
 
     def md_format(self):
@@ -556,6 +597,10 @@ news2:
         sample = f"""
 
 차트 이미지: https://ssl.pstatic.net/imgfinance/chart/item/candle/day/033790.png
+차트 이미지 wd: 
+
+![{self.code}_{self.name}_{dd}.png](./{self.code}_{self.name}_{dd}_wd.png)
+
 차트 이미지 d: 
 
 ![{self.code}_{self.name}_{dd}.png](./{self.code}_{self.name}_{dd}_d.png)
@@ -581,6 +626,8 @@ news2:
     기업개요 : {self.company_info}
 
 *****
+
+![{self.code}_{self.name}_{dd}.png](./d{dd}/{self.code}_{self.name}_{dd}_wd.png)
 
 ![{self.code}_{self.name}_{dd}.png](./d{dd}/{self.code}_{self.name}_{dd}_d.png)
 
