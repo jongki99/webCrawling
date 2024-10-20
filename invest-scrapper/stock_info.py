@@ -18,7 +18,8 @@ class MarketType(Enum):
 
 def getCodeUrl(code):
     return f"https://finance.naver.com/item/main.naver?code={code}"
-
+def getCodeJongUrl(code):
+    return f"https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd={code}"
 
 def blind_text(name, soup):
     # 전일,시가,고가,저가,거래량,거래대금 blind 찾기
@@ -456,6 +457,7 @@ class StockDetail:
     def loading(self):
         nn = datetime.datetime.now() # 현재 시간.
         dd = nn.strftime('%Y%m%d') # 현재 작업일자.
+        mm = nn.strftime('%Y%m') # 현재 작업일자.
         ddhh = nn.strftime('%Y%m%d%H') # 일단 시간단위로...
 
         def get_stock_html():
@@ -463,7 +465,13 @@ class StockDetail:
             response = requests.get(url)
             return response.text
         
-        self.naver_html = uc.file_cache_write(f"/naver_page/{dd}/stock_{self.name}_{self.code}-{ddhh}-source.txt", get_stock_html )
+        def get_stock_jong_html():
+            url = getCodeJongUrl(self.code)
+            response = requests.get(url)
+            return response.text
+        
+        self.naver_html = uc.file_cache_write(f"/naver_page/d-{dd}/stock_{self.name}_{self.code}-{ddhh}-source.txt", get_stock_html )
+        self.naver_html_jong = uc.file_cache_write(f"/naver_page/m-{mm}/stock_{self.name}_{self.code}-source2.html", get_stock_html )
         
         soup = BeautifulSoup(self.naver_html, "html.parser")
 
